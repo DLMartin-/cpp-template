@@ -17,9 +17,10 @@ struct SdlWindowContext {
   }
 };
 
+[[nodiscard]]
 SdlWindowContext CreateWindowAndRenderer(std::string_view title, int width,
                                          int height, int window_flags,
-                                         int renderer_flags) {
+                                         int renderer_flags) noexcept {
   auto window = SDL_CreateWindow(title.data(), width, height, window_flags);
   auto renderer = SDL_CreateRenderer(window, nullptr, renderer_flags);
   return SdlWindowContext{window, renderer};
