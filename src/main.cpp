@@ -1,7 +1,11 @@
-#include "appmain.h"
-#include <SDL3/SDL.h>
+#include <cstdlib>
+
 #include <fmt/color.h>
 #include <fmt/core.h>
+
+#include <SDL3/SDL.h>
+
+#include "appmain.h"
 
 int main(int const argc, char const *const argv[]) {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
@@ -11,6 +15,7 @@ int main(int const argc, char const *const argv[]) {
                SDL_GetError());
     return -1;
   }
+  std::atexit(SDL_Quit);
 
   return app_main();
 }

@@ -1,22 +1,25 @@
-#include <SDL.h>
 #include <fmt/color.h>
 #include <fmt/core.h>
 
-//Cute trick to use with structured bindings!
-// A hidden SdlWindowContext variable will be created, and go out of scope
-// like a normal variable. So you can use it as a way to manage lifetimes
-// of SDL_Window and SDL_Renderer.
-struct SdlWindowContext {
-  SDL_Window* window;
-  SDL_Renderer* renderer;
+#include <SDL.h>
 
-  ~SdlWindowContext() {
+// Cute trick to use with structured bindings!
+//  A hidden SdlWindowContext variable will be created, and go out of scope
+//  like a normal variable. So you can use it as a way to manage lifetimes
+//  of SDL_Window and SDL_Renderer.
+struct SdlWindowContext {
+  SDL_Window *window;
+  SDL_Renderer *renderer;
+
+ ~SdlWindowContext() {
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
   }
 };
 
-SdlWindowContext CreateWindowAndRenderer(std::string_view title, int width, int height, int window_flags, int renderer_flags) {
+SdlWindowContext CreateWindowAndRenderer(std::string_view title, int width,
+                                         int height, int window_flags,
+                                         int renderer_flags) {
   auto window = SDL_CreateWindow(title.data(), width, height, window_flags);
   auto renderer = SDL_CreateRenderer(window, nullptr, renderer_flags);
   return SdlWindowContext{window, renderer};
@@ -43,7 +46,6 @@ SdlWindowContext CreateWindowAndRenderer(std::string_view title, int width, int 
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
   }
-  
-  SDL_Quit();
+
   return 0;
 }
