@@ -9,7 +9,7 @@ find_package(fmt REQUIRED)
 
 add_subdirectory(tests)
 
-add_executable(my_proj src/main.cpp src/appmain.h src/appmain.cpp)
+add_executable(my_proj src/main.cpp src/appmain.cpp src/input.cpp)
 target_compile_options(my_proj PRIVATE -Wall -v)
 target_link_libraries(my_proj PRIVATE SDL3::SDL3 fmt::fmt-header-only)
 
