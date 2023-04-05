@@ -1,8 +1,12 @@
+#include <tuple>
+#include <variant>
 #include <fmt/color.h>
 #include <fmt/core.h>
 
 #include <SDL.h>
 #include "gamedata.h"
+#include "screens/overworld.h"
+#include "screens/title.h"
 
 // Cute trick to use with structured bindings!
 //  A hidden SdlWindowContext variable will be created, and go out of scope
@@ -26,6 +30,9 @@ create_window_and_renderer(std::string_view title, int width, int height,
   return SdlWindowContext{window, renderer};
 }
 
+using Screens = std::tuple<TitleScreen, OverworldScreen>;
+using CurrentScreen = std::variant<TitleScreen*, OverworldScreen*>;
+
 [[nodiscard]] int app_main() noexcept {
   auto [window, renderer] =
       create_window_and_renderer("Template", 400, 400, 0, 0);
@@ -37,6 +44,8 @@ create_window_and_renderer(std::string_view title, int width, int height,
     return -1;
   }
 
+  Screens game_screens{};
+  CurrentScreen current_screen = &std::get<0>(game_screens);
   GameData game_data;
   SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
   SDL_Event event;
@@ -44,31 +53,25 @@ create_window_and_renderer(std::string_view title, int width, int height,
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT)
         return 0;
+      if(event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
+        auto const transitionEvent = std::visit([event](auto&& screen){ return on_event(*screen, event.key); }, current_screen);
+        if(transitionEvent.has_value()) {
+          std::visit([&current_screen, &game_screens](auto&& transition){
+              using T = std::decay_t<decltype(transition)>;
+              if constexpr(std::is_same_v<T, TransitionToTitle>) {
+                current_screen = &std::get<TitleScreen>(game_screens);
+              }
+
+              if constexpr(std::is_same_v<T, TransitionToOverworld>) {
+                current_screen = &std::get<OverworldScreen>(game_screens);
+              }
+            }, transitionEvent.value());
+        }
+      }
     }
 
-    if(game_data.controller.is_key_down(KeyboardController::Key::Action)) {
-      fmt::print("Action Key!\n");
-    }
 
-    if(game_data.controller.is_key_down(KeyboardController::Key::Cancel)) {
-      fmt::print("Cancel Key!\n");
-    }
-
-    if(game_data.controller.is_key_down(KeyboardController::Key::Up)) {
-      fmt::print("Up Key!\n");
-    }
-
-    if(game_data.controller.is_key_down(KeyboardController::Key::Down)) {
-      fmt::print("Down Key!\n");
-    }
-
-    if(game_data.controller.is_key_down(KeyboardController::Key::Left)) {
-      fmt::print("Left Key!\n");
-    }
-
-    if(game_data.controller.is_key_down(KeyboardController::Key::Right)) {
-      fmt::print("Right Key!\n");
-    }
+    std::visit([](auto&& screen){ update_tic(*screen); }, current_screen);
 
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
