@@ -30,8 +30,24 @@ create_window_and_renderer(std::string_view title, int width, int height,
   return SdlWindowContext{window, renderer};
 }
 
-using Screens = std::tuple<TitleScreen, OverworldScreen>;
-using CurrentScreen = std::variant<TitleScreen*, OverworldScreen*>;
+struct Title {};
+struct OverWorld {};
+struct GameOver {};
+struct ShuttingDown {};
+
+using GameState = std::variant<Title, OverWorld, GameOver, ShuttingDown>;
+
+std::optional<GameState> process_event(Title& title, SDL_Event const& event);
+std::optional<GameState> update_tic(Title& title);
+
+std::optional<GameState> process_event(OverWorld& overworld, SDL_Event const& event);
+std::optional<GameState> update_tic(OverWorld& overworld);
+
+std::optional<GameState> process_event(GameOver& gameover, SDL_Event const& event);
+std::optional<GameState> update_tic(GameOver& gameover);
+
+std::optional<GameState> process_event(ShuttingDown&, SDL_Event const&);
+std::optional<GameState> update_tic(ShuttingDown&);
 
 [[nodiscard]] int app_main() noexcept {
   auto [window, renderer] =
@@ -44,34 +60,28 @@ using CurrentScreen = std::variant<TitleScreen*, OverworldScreen*>;
     return -1;
   }
 
-  Screens game_screens{};
-  CurrentScreen current_screen = &std::get<0>(game_screens);
+  GameState current_state;
   GameData game_data;
   SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
   SDL_Event event;
-  while (1) {
+  while (std::holds_alternative<ShuttingDown>(current_state) == false) {
     while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_EVENT_QUIT)
-        return 0;
-      if(event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
-        auto const transitionEvent = std::visit([event](auto&& screen){ return on_event(*screen, event.key); }, current_screen);
-        if(transitionEvent.has_value()) {
-          std::visit([&current_screen, &game_screens](auto&& transition){
-              using T = std::decay_t<decltype(transition)>;
-              if constexpr(std::is_same_v<T, TransitionToTitle>) {
-                current_screen = &std::get<TitleScreen>(game_screens);
-              }
-
-              if constexpr(std::is_same_v<T, TransitionToOverworld>) {
-                current_screen = &std::get<OverworldScreen>(game_screens);
-              }
-            }, transitionEvent.value());
-        }
+      if (event.type == SDL_EVENT_QUIT) {
+        current_state = ShuttingDown{};
+        break;
       }
+
+      auto const maybe_new_state = std::visit([&event](auto&& s){ return process_event(s, event); }, current_state);
+      if(maybe_new_state.has_value())
+        current_state = maybe_new_state.value();
     }
+    
+    if(std::holds_alternative<ShuttingDown>(current_state)) break;
 
-
-    std::visit([](auto&& screen){ update_tic(*screen); }, current_screen);
+    auto const maybe_new_state = std::visit([](auto&& s) { return update_tic(s); }, current_state);
+    if(maybe_new_state.has_value())
+      current_state = maybe_new_state.value();
+      
 
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
@@ -79,3 +89,69 @@ using CurrentScreen = std::variant<TitleScreen*, OverworldScreen*>;
 
   return 0;
 }
+
+std::optional<GameState> process_event(Title& title, SDL_Event const& event) {
+  if(event.type != SDL_EVENT_KEY_DOWN)
+    return std::nullopt;
+
+  if(event.key.repeat != 0) {
+    return std::nullopt;
+  }
+ 
+  if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+    return OverWorld{};
+
+  if(event.key.keysym.scancode == SDL_SCANCODE_Q)
+    return ShuttingDown{};
+
+  return std::nullopt;
+}
+
+std::optional<GameState> update_tic(Title& title) {
+  fmt::print(fg(fmt::color::lawn_green) | fmt::emphasis::bold,
+             "Title State update\n");
+  return std::nullopt;
+}
+
+std::optional<GameState> process_event(OverWorld& overworld, SDL_Event const& event) {
+  if(event.type != SDL_EVENT_KEY_DOWN)
+    return std::nullopt;
+
+  if(event.key.repeat != 0) {
+    return std::nullopt;
+  }
+
+  if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+    return GameOver{};
+
+  return std::nullopt;
+}
+
+std::optional<GameState> update_tic(OverWorld& overworld) {
+  fmt::print(fg(fmt::color::coral) | fmt::emphasis::bold,
+             "OverWorld State update\n");
+  return std::nullopt;
+}
+
+std::optional<GameState> process_event(GameOver& gameover, SDL_Event const& event) {
+  if(event.type != SDL_EVENT_KEY_DOWN)
+    return std::nullopt;
+
+  if(event.key.repeat != 0) {
+    return std::nullopt;
+  }
+
+  if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+    return Title{};
+
+  return std::nullopt;
+}
+
+std::optional<GameState> update_tic(GameOver& gameover) {
+  fmt::print(fg(fmt::color::blanched_almond) | fmt::emphasis::bold,
+             "GameOver State update\n");
+  return std::nullopt;
+}
+
+std::optional<GameState> process_event(ShuttingDown&, SDL_Event const&) { return std::nullopt; }
+std::optional<GameState> update_tic(ShuttingDown&) { return std::nullopt; }
