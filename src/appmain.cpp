@@ -5,6 +5,7 @@
 
 #include <SDL.h>
 #include "gamedata.h"
+#include "gamestate.h"
 
 // Cute trick to use with structured bindings!
 //  A hidden SdlWindowContext variable will be created, and go out of scope
@@ -28,25 +29,6 @@ create_window_and_renderer(std::string_view title, int width, int height,
   return SdlWindowContext{window, renderer};
 }
 
-struct Title {};
-struct OverWorld {};
-struct GameOver {};
-struct ShuttingDown {};
-
-using GameState = std::variant<Title, OverWorld, GameOver, ShuttingDown>;
-
-std::optional<GameState> process_event(Title& title, SDL_Event const& event);
-std::optional<GameState> update_tic(Title& title);
-
-std::optional<GameState> process_event(OverWorld& overworld, SDL_Event const& event);
-std::optional<GameState> update_tic(OverWorld& overworld);
-
-std::optional<GameState> process_event(GameOver& gameover, SDL_Event const& event);
-std::optional<GameState> update_tic(GameOver& gameover);
-
-std::optional<GameState> process_event(ShuttingDown&, SDL_Event const&);
-std::optional<GameState> update_tic(ShuttingDown&);
-
 [[nodiscard]] int app_main() noexcept {
   auto [window, renderer] =
       create_window_and_renderer("Template", 400, 400, 0, 0);
@@ -69,14 +51,14 @@ std::optional<GameState> update_tic(ShuttingDown&);
         break;
       }
 
-      auto const maybe_new_state = std::visit([&event](auto&& s){ return process_event(s, event); }, current_state);
+      auto const maybe_new_state = dispatch_event(current_state, event);
       if(maybe_new_state.has_value())
         current_state = maybe_new_state.value();
     }
     
     if(std::holds_alternative<ShuttingDown>(current_state)) break;
 
-    auto const maybe_new_state = std::visit([](auto&& s) { return update_tic(s); }, current_state);
+    auto const maybe_new_state = run_simulation(current_state);
     if(maybe_new_state.has_value())
       current_state = maybe_new_state.value();
       
@@ -88,68 +70,3 @@ std::optional<GameState> update_tic(ShuttingDown&);
   return 0;
 }
 
-std::optional<GameState> process_event(Title& title, SDL_Event const& event) {
-  if(event.type != SDL_EVENT_KEY_DOWN)
-    return std::nullopt;
-
-  if(event.key.repeat != 0) {
-    return std::nullopt;
-  }
- 
-  if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
-    return OverWorld{};
-
-  if(event.key.keysym.scancode == SDL_SCANCODE_Q)
-    return ShuttingDown{};
-
-  return std::nullopt;
-}
-
-std::optional<GameState> update_tic(Title& title) {
-  fmt::print(fg(fmt::color::lawn_green) | fmt::emphasis::bold,
-             "Title State update\n");
-  return std::nullopt;
-}
-
-std::optional<GameState> process_event(OverWorld& overworld, SDL_Event const& event) {
-  if(event.type != SDL_EVENT_KEY_DOWN)
-    return std::nullopt;
-
-  if(event.key.repeat != 0) {
-    return std::nullopt;
-  }
-
-  if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
-    return GameOver{};
-
-  return std::nullopt;
-}
-
-std::optional<GameState> update_tic(OverWorld& overworld) {
-  fmt::print(fg(fmt::color::coral) | fmt::emphasis::bold,
-             "OverWorld State update\n");
-  return std::nullopt;
-}
-
-std::optional<GameState> process_event(GameOver& gameover, SDL_Event const& event) {
-  if(event.type != SDL_EVENT_KEY_DOWN)
-    return std::nullopt;
-
-  if(event.key.repeat != 0) {
-    return std::nullopt;
-  }
-
-  if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
-    return Title{};
-
-  return std::nullopt;
-}
-
-std::optional<GameState> update_tic(GameOver& gameover) {
-  fmt::print(fg(fmt::color::blanched_almond) | fmt::emphasis::bold,
-             "GameOver State update\n");
-  return std::nullopt;
-}
-
-std::optional<GameState> process_event(ShuttingDown&, SDL_Event const&) { return std::nullopt; }
-std::optional<GameState> update_tic(ShuttingDown&) { return std::nullopt; }
