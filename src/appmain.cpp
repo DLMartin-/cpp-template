@@ -1,12 +1,10 @@
-#include <tuple>
+#include <optional>
 #include <variant>
 #include <fmt/color.h>
 #include <fmt/core.h>
 
 #include <SDL.h>
 #include "gamedata.h"
-#include "screens/overworld.h"
-#include "screens/title.h"
 
 // Cute trick to use with structured bindings!
 //  A hidden SdlWindowContext variable will be created, and go out of scope
