@@ -70,7 +70,3 @@ create_window_and_renderer(std::string_view title, int width, int height,
   return 0;
 }
 
-std::optional<GameState> process_event(ShuttingDown&, SDL_Event const&) { return std::nullopt; }
-std::optional<GameState> update_tic(ShuttingDown&) { return std::nullopt; }
-
-
