@@ -23,3 +23,7 @@ void update_tic(GameOver& gameover) {
              "GameOver State update (NEW!!!!!!!!!!)\n");
 }
 
+void display(GameOver const& gameover, SDL_Renderer* renderer) {
+  SDL_SetRenderDrawColor(renderer, 25, 100, 255, SDL_ALPHA_OPAQUE);
+}
+

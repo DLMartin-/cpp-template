@@ -26,3 +26,8 @@ void update_tic(Title& title) {
   fmt::print(fg(fmt::color::coral) | fmt::emphasis::bold,
              "Title State update (NEW)\n");
 }
+
+void display(Title const& overworld, SDL_Renderer* renderer) {
+  SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
+}
+

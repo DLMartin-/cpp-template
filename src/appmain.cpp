@@ -42,7 +42,6 @@ create_window_and_renderer(std::string_view title, int width, int height,
 
   GameState current_state;
   GameData game_data;
-  SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
   SDL_Event event;
   while (std::holds_alternative<ShuttingDown>(current_state) == false) {
     while (SDL_PollEvent(&event)) {
@@ -58,13 +57,10 @@ create_window_and_renderer(std::string_view title, int width, int height,
     
     if(std::holds_alternative<ShuttingDown>(current_state)) break;
 
-    auto const maybe_new_state = run_simulation(current_state);
-    if(maybe_new_state.has_value())
+    if(auto const maybe_new_state = run_simulation(current_state); maybe_new_state.has_value())
       current_state = maybe_new_state.value();
       
-
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
+    display(current_state, renderer);
   }
 
   return 0;

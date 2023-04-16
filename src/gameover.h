@@ -8,6 +8,7 @@ struct GameOver {};
 
 std::optional<Title> process_event(GameOver& gameover, SDL_Event const& event);
 void update_tic(GameOver& gameover);
+void display(GameOver const& gameover, SDL_Renderer* renderer);
 
 #endif
 

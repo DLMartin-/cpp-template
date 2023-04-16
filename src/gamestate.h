@@ -15,5 +15,7 @@ using GameState = std::variant<Title, OverWorld, GameOver, ShuttingDown>;
 std::optional<GameState> dispatch_event(GameState& gamestate, SDL_Event const& event);
 std::optional<GameState> run_simulation(GameState& gamestate);
 
+void display(GameState const& gamestate, SDL_Renderer* renderer);
+
 #endif
 

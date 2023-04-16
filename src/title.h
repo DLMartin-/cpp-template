@@ -13,6 +13,7 @@ struct Title {};
 
 std::optional<std::variant<OverWorld, ShuttingDown>> process_event(Title& title, SDL_Event const& event);
 void update_tic(Title& title);
+void display(Title const& overworld, SDL_Renderer* renderer);
 
 #endif
 

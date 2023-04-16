@@ -23,3 +23,6 @@ void update_tic(OverWorld& overworld) {
              "OverWorld State update (NEW!!!)\n");
 }
 
+void display(OverWorld const& overworld, SDL_Renderer* renderer) {
+  SDL_SetRenderDrawColor(renderer, 255, 225, 25, SDL_ALPHA_OPAQUE);
+}
