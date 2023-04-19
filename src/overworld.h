@@ -2,13 +2,10 @@
 #define OVERWORLD_STATE_H_
 #include <optional>
 #include <SDL.h>
+#include "gamestate.h"
 
-struct GameOver;
-struct OverWorld {};
-
-
-std::optional<GameOver> process_event(OverWorld& overworld, SDL_Event const& event);
-void update_tic(OverWorld& overworld);
+std::optional<GameState> process_event(OverWorld& overworld, SDL_Event const& event);
+std::optional<GameState> update_tic(OverWorld& overworld);
 void display(OverWorld const& overworld, SDL_Renderer* renderer);
 #endif
 

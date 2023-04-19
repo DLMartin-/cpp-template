@@ -2,12 +2,10 @@
 #define GAME_OVER_STATE_H_
 #include <optional>
 #include <SDL.h>
+#include "gamestate.h"
 
-struct Title;
-struct GameOver {};
-
-std::optional<Title> process_event(GameOver& gameover, SDL_Event const& event);
-void update_tic(GameOver& gameover);
+std::optional<GameState> process_event(GameOver& gameover, SDL_Event const& event);
+std::optional<GameState> update_tic(GameOver& gameover);
 void display(GameOver const& gameover, SDL_Renderer* renderer);
 
 #endif

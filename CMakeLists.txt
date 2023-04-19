@@ -9,7 +9,7 @@ find_package(fmt REQUIRED)
 
 add_subdirectory(tests)
 
-add_executable(my_proj src/main.cpp src/appmain.cpp src/input.cpp src/gamestate.cpp src/gameover.cpp src/overworld.cpp src/shuttingdown.cpp src/title.cpp)
+add_executable(my_proj src/main.cpp src/appmain.cpp src/input.cpp src/gameover.cpp src/overworld.cpp src/title.cpp)
 target_compile_options(my_proj PRIVATE -Wall -v -g)
 target_link_libraries(my_proj PRIVATE SDL3::SDL3 fmt::fmt-header-only)
 

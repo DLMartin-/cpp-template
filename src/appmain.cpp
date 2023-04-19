@@ -7,6 +7,10 @@
 #include "gamedata.h"
 #include "gamestate.h"
 
+#include "gameover.h"
+#include "title.h"
+#include "overworld.h"
+
 // Cute trick to use with structured bindings!
 //  A hidden SdlWindowContext variable will be created, and go out of scope
 //  like a normal variable. So you can use it as a way to manage lifetimes
@@ -28,6 +32,11 @@ create_window_and_renderer(std::string_view title, int width, int height,
   auto renderer = SDL_CreateRenderer(window, nullptr, renderer_flags);
   return SdlWindowContext{window, renderer};
 }
+
+std::optional<GameState> dispatch_event(GameState& gamestate, SDL_Event const& event);
+std::optional<GameState> run_simulation(GameState& gamestate);
+
+void display(GameState const& gamestate, SDL_Renderer* renderer);
 
 [[nodiscard]] int app_main() noexcept {
   auto [window, renderer] =
@@ -64,5 +73,38 @@ create_window_and_renderer(std::string_view title, int width, int height,
   }
 
   return 0;
+}
+
+std::optional<GameState> dispatch_event(GameState& gamestate, SDL_Event const& event) {
+  return std::visit([event](auto&& s) -> std::optional<GameState> {
+      using T = std::decay_t<decltype(s)>;
+
+      if constexpr(std::is_same_v<T, ShuttingDown>) return std::nullopt;
+      else return process_event(s, event);
+
+    }, gamestate);
+}
+
+std::optional<GameState> run_simulation(GameState& gamestate) {
+  return std::visit([](auto&& s) -> std::optional<GameState> {
+      using T = std::decay_t<decltype(s)>;
+
+      if constexpr(std::is_same_v<T, ShuttingDown>) return std::nullopt;
+      else return update_tic(s);
+
+    }, gamestate);
+}
+
+void display(GameState const& gamestate, SDL_Renderer* renderer) {
+  std::visit([renderer](auto&& s) { 
+      using T = std::decay_t<decltype(s)>;
+
+      if constexpr(!std::is_same_v<T, ShuttingDown>)
+        display(s, renderer);
+
+    }, gamestate);
+
+  SDL_RenderClear(renderer);
+  SDL_RenderPresent(renderer);
 }
 

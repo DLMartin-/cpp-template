@@ -1,11 +1,9 @@
 #include "title.h"
-#include "shuttingdown.h"
-#include "overworld.h"
 
 #include <fmt/color.h>
 #include <fmt/core.h>
 
-std::optional<std::variant<OverWorld, ShuttingDown>> process_event(Title& title, SDL_Event const& event) {
+std::optional<GameState> process_event(Title& title, SDL_Event const& event) {
   if(event.type != SDL_EVENT_KEY_DOWN)
     return std::nullopt;
 
@@ -22,9 +20,10 @@ std::optional<std::variant<OverWorld, ShuttingDown>> process_event(Title& title,
   return std::nullopt;
 }
 
-void update_tic(Title& title) { 
+std::optional<GameState> update_tic(Title& title) { 
   fmt::print(fg(fmt::color::coral) | fmt::emphasis::bold,
              "Title State update (NEW)\n");
+  return std::nullopt;
 }
 
 void display(Title const& overworld, SDL_Renderer* renderer) {

@@ -5,14 +5,10 @@
 #include <variant>
 
 #include <SDL.h>
+#include "gamestate.h"
 
-struct ShuttingDown;
-struct OverWorld;
-
-struct Title {};
-
-std::optional<std::variant<OverWorld, ShuttingDown>> process_event(Title& title, SDL_Event const& event);
-void update_tic(Title& title);
+std::optional<GameState> process_event(Title& title, SDL_Event const& event);
+std::optional<GameState> update_tic(Title& title);
 void display(Title const& overworld, SDL_Renderer* renderer);
 
 #endif

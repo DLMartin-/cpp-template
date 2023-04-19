@@ -1,10 +1,9 @@
 #include "gameover.h"
-#include "title.h"
 
 #include <fmt/color.h>
 #include <fmt/core.h>
 
-std::optional<Title> process_event(GameOver& gameover, SDL_Event const& event) {
+std::optional<GameState> process_event(GameOver& gameover, SDL_Event const& event) {
   if(event.type != SDL_EVENT_KEY_DOWN)
     return std::nullopt;
 
@@ -18,9 +17,11 @@ std::optional<Title> process_event(GameOver& gameover, SDL_Event const& event) {
   return std::nullopt;
 }
 
-void update_tic(GameOver& gameover) {
+std::optional<GameState> update_tic(GameOver& gameover) {
   fmt::print(fg(fmt::color::blanched_almond) | fmt::emphasis::bold,
              "GameOver State update (NEW!!!!!!!!!!)\n");
+
+  return std::nullopt;
 }
 
 void display(GameOver const& gameover, SDL_Renderer* renderer) {
