@@ -12,7 +12,7 @@ std::optional<GameState> process_event(Title& title, SDL_Event const& event) {
   }
  
   if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
-    return OverWorld{};
+    return Transition{};
 
   if(event.key.keysym.scancode == SDL_SCANCODE_Q)
     return ShuttingDown{};

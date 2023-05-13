@@ -10,6 +10,7 @@
 #include "gameover.h"
 #include "title.h"
 #include "overworld.h"
+#include "transition.h"
 
 // Cute trick to use with structured bindings!
 //  A hidden SdlWindowContext variable will be created, and go out of scope

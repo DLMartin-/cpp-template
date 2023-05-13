@@ -8,8 +8,11 @@ struct Title {};
 struct OverWorld {};
 struct GameOver {};
 struct ShuttingDown {};
+struct Transition {
+  unsigned elapsed_frames;
+};
 
-using GameState = std::variant<Title, OverWorld, GameOver, ShuttingDown>;
+using GameState = std::variant<Title, OverWorld, GameOver, ShuttingDown, Transition>;
 
 #endif
 
