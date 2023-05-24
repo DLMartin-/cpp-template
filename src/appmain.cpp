@@ -1,3 +1,4 @@
+#include <chrono>
 #include <optional>
 #include <variant>
 #include <fmt/color.h>
@@ -53,7 +54,21 @@ void display(GameState const& gamestate, SDL_Renderer* renderer);
   GameState current_state;
   GameData game_data;
   SDL_Event event;
+
+  using FpMillisecs = std::chrono::duration<double, std::chrono::milliseconds::period>;
+
+  const FpMillisecs delta_time(1000 / 60);
+  FpMillisecs accumulator(0);
+  auto current_time = std::chrono::high_resolution_clock::now();
+  
+
   while (std::holds_alternative<ShuttingDown>(current_state) == false) {
+    auto const new_time = std::chrono::high_resolution_clock::now();
+    FpMillisecs const frame_time = (new_time - current_time);
+
+    current_time = new_time;
+    accumulator += frame_time;
+
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) {
         current_state = ShuttingDown{};
@@ -67,8 +82,14 @@ void display(GameState const& gamestate, SDL_Renderer* renderer);
     
     if(std::holds_alternative<ShuttingDown>(current_state)) break;
 
-    if(auto const maybe_new_state = run_simulation(current_state); maybe_new_state.has_value())
-      current_state = maybe_new_state.value();
+
+    while(accumulator >= delta_time) {
+      if(auto const maybe_new_state = run_simulation(current_state); maybe_new_state.has_value()) {
+        current_state = maybe_new_state.value();
+      }
+
+      accumulator -= delta_time;
+    }
       
     display(current_state, renderer);
   }

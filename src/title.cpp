@@ -1,5 +1,6 @@
 #include "title.h"
 
+#include <iostream>
 #include <fmt/color.h>
 #include <fmt/core.h>
 
@@ -22,11 +23,11 @@ std::optional<GameState> process_event(Title& title, SDL_Event const& event) {
 
 std::optional<GameState> update_tic(Title& title) { 
   fmt::print(fg(fmt::color::coral) | fmt::emphasis::bold,
-             "Title State update (NEW)\n");
+             "Title State update(NEW)\n");
   return std::nullopt;
 }
 
-void display(Title const& overworld, SDL_Renderer* renderer) {
+void display(Title const& title, SDL_Renderer* renderer) {
   SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
 }
 
